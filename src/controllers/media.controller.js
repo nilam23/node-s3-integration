@@ -46,6 +46,45 @@ export class MediaController {
       } else if (error.code === 'NoSuchKey') { // on providing a file that does not exist in the bucket
         errorMsg = error.message || 'Internal Server Error';
         statusCode = error.statusCode || HTTP_STATUS_CODES.BAD_REQUEST;
+      } else {
+        errorMsg = error.message || 'Internal Server Error';
+        statusCode = error.statusCode || HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
+      }
+
+      return next(new AppError(
+        errorMsg,
+        statusCode,
+        error.response || error
+      ));
+    }
+  }
+
+  /**
+   * @description
+   * the controller method to delete a media from S3 bucket
+   * @param {object} req the request object
+   * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
+   */
+  static async deleteMedia(req, res, next) {
+    try {
+      const { file } = req.query;
+      await S3.deleteObject({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: file,
+      }).promise();
+
+      return sendResponse(res, HTTP_STATUS_CODES.OK, 'Media deleted successfully');
+    } catch (error) {
+      let errorMsg = '';
+      let statusCode;
+
+      if (error.code === 'MissingRequiredParameter') { // on not providing the name of the file to be deleted
+        errorMsg = error.message || 'Internal Server Error';
+        statusCode = error.statusCode || HTTP_STATUS_CODES.BAD_REQUEST;
+      } else {
+        errorMsg = error.message || 'Internal Server Error';
+        statusCode = error.statusCode || HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
       }
 
       return next(new AppError(

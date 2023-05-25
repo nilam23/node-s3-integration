@@ -10,5 +10,6 @@ export const mediaRoutes = (app) => {
   app
     .route('/media')
     .get(MediaController.fetchMedia)
-    .post(upload.single('file'), MediaController.uploadMedia);
+    .post(upload.single('file'), MediaController.uploadMedia)
+    .delete(MediaController.deleteMedia);
 };
