@@ -12,4 +12,8 @@ export const mediaRoutes = (app) => {
     .get(MediaController.fetchMedia)
     .post(upload.single('file'), MediaController.uploadMedia)
     .delete(MediaController.deleteMedia);
+
+  app
+    .route('/media/list')
+    .get(MediaController.fetchAllMedia);
 };

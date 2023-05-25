@@ -61,6 +61,33 @@ export class MediaController {
 
   /**
    * @description
+   * the controller method to fetch all media from S3 bucket
+   * @param {object} req the request object
+   * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
+   * @returns the media available in the S3 bucket
+   */
+  static async fetchAllMedia(_, res, next) {
+    try {
+      const fetchAllMediaResult = await S3.listObjectsV2({
+        Bucket: process.env.AWS_S3_BUCKET_NAME
+      }).promise();
+
+      const { Contents: mediaContents, Name: bucketName } = fetchAllMediaResult;
+      const media = mediaContents.map((item) => item.Key);
+
+      return sendResponse(res, HTTP_STATUS_CODES.OK, 'All media fetched successfully', { bucketName, media });
+    } catch (error) {
+      return next(new AppError(
+        error.message || 'Internal Server Error',
+        error.statusCode || HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+        error.response || error
+      ));
+    }
+  }
+
+  /**
+   * @description
    * the controller method to delete a media from S3 bucket
    * @param {object} req the request object
    * @param {object} res the response object
